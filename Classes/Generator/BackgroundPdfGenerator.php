@@ -51,7 +51,7 @@ class BackgroundPdfGenerator extends AbstractPdfGenerator implements PdfGenerato
 	 */
 	protected function dispatchPdfGeneration($scriptCall) {
 
-		$logFile = empty($this->generatorOptions['logFile']) ? '' : GeneralUtility::getFileAbsFileName($this->generatorOptions['logFile'], TRUE);
+		$logFile = empty($this->generatorOptions['logFile']) ? '' : GeneralUtility::getFileAbsFileName($this->generatorOptions['logFile']);
 
 		if ($logFile === '') {
 			$logFile = '/dev/null';

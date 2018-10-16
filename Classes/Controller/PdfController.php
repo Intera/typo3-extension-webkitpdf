@@ -165,7 +165,7 @@ class PdfController extends AbstractPlugin {
 			$this->paramName = $this->options['customParameterName'];
 		}
 
-		$this->filenameStorage = $this->filenameDownload = $this->options['filePrefix'] . GeneralUtility::hmac(GeneralUtility::generateRandomBytes(512), 'TxWebkitpdfPdfFilename') . '.pdf';
+		$this->filenameStorage = $this->filenameDownload = $this->options['filePrefix'] . GeneralUtility::hmac(GeneralUtility::makeInstance(\TYPO3\CMS\Core\Crypto\Random::class)->generateRandomBytes(512), 'TxWebkitpdfPdfFilename') . '.pdf';
 		if (!empty($this->options['staticFileName'])) {
 			$this->filenameDownload = $this->pdfUtility->sanitizeFilename($this->options['staticFileName']);
 		}
