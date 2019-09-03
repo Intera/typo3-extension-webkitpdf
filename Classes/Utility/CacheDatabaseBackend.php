@@ -105,14 +105,19 @@ class CacheDatabaseBackend extends AbstractBackend {
 	 * @param string $data The data to be stored
 	 * @param array $tags Tags to associate with this cache entry
 	 * @param integer $lifetime Lifetime of this cache entry in seconds. If NULL is specified, the default lifetime is used. "0" means unlimited liftime.
-	 * @return void
+     * @throws \TYPO3\CMS\Core\Cache\Exception if no cache frontend has been set.
+     * @throws \TYPO3\CMS\Core\Cache\Exception\InvalidDataException if the data is not a string
 	 */
 	public function set($entryIdentifier, $data, array $tags = array(), $lifetime = NULL) {
 		if ($this->maximumNumberOfEntries > 0 && !$this->has($entryIdentifier)) {
 			$this->removeOldEntriesIfRequired();
 		}
-		parent::set($entryIdentifier, $data, $tags, $lifetime);
-	}
+        try {
+            parent::set($entryIdentifier, $data, $tags, $lifetime);
+        } catch (\TYPO3\CMS\Core\Cache\Exception\InvalidDataException $e) {
+        } catch (\TYPO3\CMS\Core\Cache\Exception $e) {
+        }
+    }
 
 	/**
 	 * Sets the maximum number of allowed cache entries.
