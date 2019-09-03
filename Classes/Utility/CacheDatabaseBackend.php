@@ -114,7 +114,7 @@ class CacheDatabaseBackend extends AbstractBackend
             $this->removeOldEntriesIfRequired();
         }
         try {
-            if (!$this->isValidEntryIdentifier($entryIdentifier)) {
+            if (!$entryIdentifier) {
                 throw new \InvalidArgumentException('"' . $entryIdentifier . '" is not a valid cache entry identifier.', 1264023823);
             }
             if (!is_string($data)) {
@@ -125,7 +125,6 @@ class CacheDatabaseBackend extends AbstractBackend
                     throw new \InvalidArgumentException('"' . $tag . '" is not a valid tag for a cache entry.', 1264023825);
                 }
             }
-            $data = '<?php' . LF . $data . LF . '#';
             parent::set($entryIdentifier, $data, $tags, $lifetime);
         } catch (\TYPO3\CMS\Core\Cache\Exception\InvalidDataException $e) {
         } catch (\TYPO3\CMS\Core\Cache\Exception $e) {
