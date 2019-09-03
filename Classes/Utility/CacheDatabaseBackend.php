@@ -26,13 +26,13 @@ namespace Tx\Webkitpdf\Utility;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Cache\Backend\AbstractBackend;
+use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache;
 
 /**
  * Cache handling for generated PDF documents.
  */
-class CacheDatabaseBackend extends AbstractBackend {
+class CacheDatabaseBackend extends Typo3DatabaseBackend {
 
         /**
          * Sets a reference to the cache frontend which uses this backend
@@ -99,19 +99,19 @@ class CacheDatabaseBackend extends AbstractBackend {
 	}
 
 	/**
-	 * Saves data in a cache file.
-	 *
-	 * @param string $entryIdentifier An identifier for this specific cache entry
-	 * @param string $data The data to be stored
-	 * @param array $tags Tags to associate with this cache entry
-	 * @param integer $lifetime Lifetime of this cache entry in seconds. If NULL is specified, the default lifetime is used. "0" means unlimited liftime.
+     * Saves data in a cache file.
+     *
+     * @param string $entryIdentifier An identifier for this specific cache entry
+     * @param string $data The data to be stored
+     * @param array $tags Tags to associate with this cache entry
+     * @param integer $lifetime Lifetime of this cache entry in seconds. If NULL is specified, the default lifetime is used. "0" means unlimited liftime.
      * @throws \TYPO3\CMS\Core\Cache\Exception if no cache frontend has been set.
      * @throws \TYPO3\CMS\Core\Cache\Exception\InvalidDataException if the data is not a string
-	 */
-	public function set($entryIdentifier, $data, array $tags = array(), $lifetime = NULL) {
-		if ($this->maximumNumberOfEntries > 0 && !$this->has($entryIdentifier)) {
-			$this->removeOldEntriesIfRequired();
-		}
+     */
+    public function set($entryIdentifier, $data, array $tags = array(), $lifetime = NULL) {
+        if ($this->maximumNumberOfEntries > 0 && !$this->has($entryIdentifier)) {
+            $this->removeOldEntriesIfRequired();
+        }
         try {
             parent::set($entryIdentifier, $data, $tags, $lifetime);
         } catch (\TYPO3\CMS\Core\Cache\Exception\InvalidDataException $e) {
