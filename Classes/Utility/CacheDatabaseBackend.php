@@ -41,7 +41,7 @@ class CacheDatabaseBackend extends AbstractBackend
          * @param Cache\Frontend\FrontendInterface $cache The frontend for this backend
          */
         public function setCache(Cache\Frontend\FrontendInterface $cache){
-            
+
         }
         /**
          * Checks if a cache entry with the specified identifier exists.
@@ -125,7 +125,7 @@ class CacheDatabaseBackend extends AbstractBackend
                     throw new \InvalidArgumentException('"' . $tag . '" is not a valid tag for a cache entry.', 1264023825);
                 }
             }
-            parent::set($entryIdentifier, $data, $tags, $lifetime);
+            //parent::set($entryIdentifier, $data, $tags, $lifetime);
         } catch (\TYPO3\CMS\Core\Cache\Exception\InvalidDataException $e) {
         } catch (\TYPO3\CMS\Core\Cache\Exception $e) {
         }
