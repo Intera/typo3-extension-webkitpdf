@@ -26,13 +26,14 @@ namespace Tx\Webkitpdf\Utility;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
+use TYPO3\CMS\Core\Cache\Frontend\AbstractFrontend;
 use TYPO3\CMS\Core\Cache;
 
 /**
  * Cache handling for generated PDF documents.
  */
-class CacheDatabaseBackend extends Typo3DatabaseBackend {
+class CacheDatabaseBackend extends AbstractFrontend
+ {
 
         /**
          * Sets a reference to the cache frontend which uses this backend
@@ -113,6 +114,18 @@ class CacheDatabaseBackend extends Typo3DatabaseBackend {
             $this->removeOldEntriesIfRequired();
         }
         try {
+            if (!$this->isValidEntryIdentifier($entryIdentifier)) {
+                throw new \InvalidArgumentException('"' . $entryIdentifier . '" is not a valid cache entry identifier.', 1264023823);
+            }
+            if (!is_string($data)) {
+                throw new \TYPO3\CMS\Core\Cache\Exception\InvalidDataException('The given source code is not a valid string.', 1264023824);
+            }
+            foreach ($tags as $tag) {
+                if (!$this->isValidTag($tag)) {
+                    throw new \InvalidArgumentException('"' . $tag . '" is not a valid tag for a cache entry.', 1264023825);
+                }
+            }
+            $data = '<?php' . LF . $data . LF . '#';
             parent::set($entryIdentifier, $data, $tags, $lifetime);
         } catch (\TYPO3\CMS\Core\Cache\Exception\InvalidDataException $e) {
         } catch (\TYPO3\CMS\Core\Cache\Exception $e) {
