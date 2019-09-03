@@ -26,7 +26,7 @@ namespace Tx\Webkitpdf\Utility;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Cache\Backend\AbstractBackend
+use TYPO3\CMS\Core\Cache\Backend\AbstractBackend;
 use TYPO3\CMS\Core\Cache;
 
 /**
