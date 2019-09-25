@@ -20,7 +20,7 @@
 	},
 	"require": {
 		"php": "^7.0",
-		"typo3/cms-core": "^7.6|^8.7|^9.3"
+		"typo3/cms-core": "^8.7|^9.3"
 	},
 	"replace": {
 		"typo3-ter/webkitpdf": "self.version"

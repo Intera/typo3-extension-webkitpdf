@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Tx\Webkitpdf\Utility;
 
 /***************************************************************
@@ -24,97 +26,127 @@ namespace Tx\Webkitpdf\Utility;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use InvalidArgumentException;
+use PDO;
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Cache handling for generated PDF documents.
  */
-class CacheDatabaseBackend extends Typo3DatabaseBackend {
+class CacheDatabaseBackend extends Typo3DatabaseBackend
+{
+    /**
+     * If this is larger 0 and the number of entries in the cache exeeds the
+     * number of allowed entries, old entries will be deleted.
+     *
+     * @var int
+     */
+    protected $maximumNumberOfEntries = 0;
 
-	/**
-	 * If this is larger 0 and the number of entries in the cache exeeds the
-	 * number of allowed entries, old entries will be deleted.
-	 *
-	 * @var int
-	 */
-	protected $maximumNumberOfEntries = 0;
+    /**
+     * Does the default garbage collection of the Typo3DatabaseBackend and removes
+     * all files from the PDF cache directory that have no valid cache entries.
+     *
+     * @return void
+     */
+    public function collectGarbage()
+    {
+        parent::collectGarbage();
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
+        $cacheManager->collectGarbage();
+    }
 
-	/**
-	 * Does the default garbage collection of the Typo3DatabaseBackend and removes
-	 * all files from the PDF cache directory that have no valid cache entries.
-	 *
-	 * @return void
-	 */
-	public function collectGarbage() {
-		parent::collectGarbage();
-		$cacheManager = GeneralUtility::makeInstance(CacheManager::class);
-		$cacheManager->collectGarbage();
-	}
+    /**
+     * Saves data in a cache file.
+     *
+     * @param string $entryIdentifier An identifier for this specific cache entry
+     * @param string $data The data to be stored
+     * @param array $tags Tags to associate with this cache entry
+     * @param integer $lifetime Lifetime of this cache entry in seconds. If NULL is specified, the default lifetime is
+     *     used. "0" means unlimited liftime.
+     * @return void
+     */
+    public function set($entryIdentifier, $data, array $tags = [], $lifetime = null)
+    {
+        if ($this->maximumNumberOfEntries > 0 && !$this->has($entryIdentifier)) {
+            $this->removeOldEntriesIfRequired();
+        }
+        parent::set($entryIdentifier, $data, $tags, $lifetime);
+    }
 
-	/**
-	 * Saves data in a cache file.
-	 *
-	 * @param string $entryIdentifier An identifier for this specific cache entry
-	 * @param string $data The data to be stored
-	 * @param array $tags Tags to associate with this cache entry
-	 * @param integer $lifetime Lifetime of this cache entry in seconds. If NULL is specified, the default lifetime is used. "0" means unlimited liftime.
-	 * @return void
-	 */
-	public function set($entryIdentifier, $data, array $tags = array(), $lifetime = NULL) {
-		if ($this->maximumNumberOfEntries > 0 && !$this->has($entryIdentifier)) {
-			$this->removeOldEntriesIfRequired();
-		}
-		parent::set($entryIdentifier, $data, $tags, $lifetime);
-	}
+    /**
+     * Sets the maximum number of allowed cache entries.
+     *
+     * @param int $maximumNumberOfEntries
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    public function setMaximumNumberOfEntries($maximumNumberOfEntries)
+    {
+        if (!is_int($maximumNumberOfEntries) || $maximumNumberOfEntries < 0) {
+            throw new InvalidArgumentException(
+                'The maxiumum number of entries must be given as a positive integer.',
+                1233072774
+            );
+        }
 
-	/**
-	 * Sets the maximum number of allowed cache entries.
-	 *
-	 * @param int $maximumNumberOfEntries
-	 * @return void
-	 * @throws \InvalidArgumentException
-	 */
-	public function setMaximumNumberOfEntries($maximumNumberOfEntries) {
+        $this->maximumNumberOfEntries = $maximumNumberOfEntries;
+    }
 
-		if (!is_int($maximumNumberOfEntries) || $maximumNumberOfEntries < 0) {
-			throw new \InvalidArgumentException('The maxiumum number of entries must be given as a positive integer.', 1233072774);
-		}
+    /**
+     * @param QueryBuilder $countQueryBuilder
+     * @return string
+     */
+    protected function buildNonExpiredContraint(QueryBuilder $countQueryBuilder): string
+    {
+        return $countQueryBuilder->expr()->gte(
+            'expires',
+            $countQueryBuilder->createNamedParameter($GLOBALS['EXEC_TIME'], PDO::PARAM_INT)
+        );
+    }
 
-		$this->maximumNumberOfEntries = $maximumNumberOfEntries;
-	}
+    protected function getQueryBuilder()
+    {
+        return GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable($this->cacheTable);
+    }
 
-	/**
-	 * @return \TYPO3\CMS\Core\Database\DatabaseConnection
-	 */
-	protected function getDatabaseConnection() {
-		return $GLOBALS['TYPO3_DB'];
-	}
+    /**
+     * Checks if there are more valid entries in the database than allowed and
+     * removes old entries if required. After this call one more entry can be added
+     * whithout exceeding the $maximumNumberOfEntries limit.
+     *
+     * @return void
+     */
+    protected function removeOldEntriesIfRequired()
+    {
+        $countQuery = $this->getQueryBuilder();
+        $cacheEntryCount = $countQuery->count('id')
+            ->from($this->cacheTable)
+            ->where($this->buildNonExpiredContraint($countQuery))
+            ->execute()
+            ->fetchColumn(0);
 
-	/**
-	 * Checks if there are more valid entries in the database than allowed and
-	 * removes old entries if required. After this call one more entry can be added
-	 * whithout exceeding the $maximumNumberOfEntries limit.
-	 *
-	 * @return void
-	 */
-	protected function removeOldEntriesIfRequired() {
+        if ($cacheEntryCount < $this->maximumNumberOfEntries) {
+            return;
+        }
 
-		$db = $this->getDatabaseConnection();
-		$cacheEntryCount = $db->exec_SELECTcountRows(
-			'*',
-			$this->cacheTable,
-			$this->notExpiredStatement
-		);
+        $tooManyItems = ($cacheEntryCount + 1) - $this->maximumNumberOfEntries;
 
-		if ($cacheEntryCount < $this->maximumNumberOfEntries) {
-			return;
-		}
+        $deleteSelect = $this->getQueryBuilder();
+        $deleteResult = $deleteSelect
+            ->select('identifier')
+            ->from($this->cacheTable)
+            ->where($this->buildNonExpiredContraint($deleteSelect))
+            ->setMaxResults($tooManyItems)
+            ->orderBy('expires', 'ASC')
+            ->execute();
 
-		$tooManyItems = ($cacheEntryCount + 1) - $this->maximumNumberOfEntries;
-		$rows = $db->exec_SELECTgetRows($this->identifierField, $this->cacheTable, $this->notExpiredStatement, '', $this->expiresField . ' ASC', $tooManyItems);
-		foreach ($rows as $row) {
-			$this->remove(array_shift($row));
-		}
-	}
+        foreach ($deleteResult->fetchColumn(0) as $identifier) {
+            $this->remove($identifier);
+        }
+    }
 }
