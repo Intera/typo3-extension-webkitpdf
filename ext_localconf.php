@@ -22,7 +22,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$_EXTKEY]['pdfCacheFolderIdentifier'] =
     isset($_EXTCONF['pdfCacheFolderIdentifier']) ? $_EXTCONF['pdfCacheFolderIdentifier'] : '0:/typo3temp/tx_webkitpdf/';
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][\Tx\Webkitpdf\Utility\CacheManager::CACHE_IDENTIFIER] = [
-    'frontend' => \TYPO3\CMS\Core\Cache\Frontend\StringFrontend::class,
+    'frontend' => \TYPO3\CMS\Core\Cache\Frontend\VariableFrontend::class,
     'backend' => \Tx\Webkitpdf\Utility\CacheDatabaseBackend::class,
     'options' => [
         'defaultLifetime' => $GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$_EXTKEY]['cacheLifetime'],
