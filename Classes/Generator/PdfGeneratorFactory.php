@@ -40,6 +40,7 @@ class PdfGeneratorFactory implements SingletonInterface {
 	protected $generatorRegistry = array(
 		'foreground' => ForegroundPdfGenerator::class,
 		'background' => BackgroundPdfGenerator::class,
+		'puppeteer' => PuppeteerPdfGenerator::class,
 	);
 
 	/**
