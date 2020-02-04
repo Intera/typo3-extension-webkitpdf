@@ -5,5 +5,4 @@ plugin.tx_webkitpdf_pi1.pdfLink {
 
   # cat=plugin.tx_webkitpdf_pi1/links/2; type=string; label=linkText: PDF link text.
   linkText = Save as PDF
-
 }

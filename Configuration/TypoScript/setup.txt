@@ -1,85 +1,85 @@
-
 plugin.tx_webkitpdf_pi1 = USER_INT
 plugin.tx_webkitpdf_pi1 {
 
-	userFunc = Tx\Webkitpdf\Controller\PdfController->main
+  userFunc = Tx\Webkitpdf\Controller\PdfController->main
 
-	contentObjects {
-		errorMessage = TEXT
-		errorMessage.field = tx_webkitpdf_error
-		errorMessage.wrap = <div class="error">|</div>
-	}
+  contentObjects {
+    errorMessage = TEXT
+    errorMessage.field = tx_webkitpdf_error
+    errorMessage.wrap = <div class="error">|</div>
+  }
 
-	pdfLink = TEXT
-	pdfLink {
-		value = {$plugin.tx_webkitpdf_pi1.pdfLink.linkText}
-		typolink {
-			parameter = {$plugin.tx_webkitpdf_pi1.pdfLink.pluginPid}
-			additionalParams.cObject = COA
-			additionalParams.cObject {
-				10 = TEXT
-				10 {
-					data = getIndpEnv:TYPO3_REQUEST_URL
-					rawUrlEncode = 1
-					wrap = &tx_webkitpdf_pi1[urls][0]=|
-				}
-				20 = TEXT
-				20 {
-					data = TSFE:id
-					wrap = &tx_webkitpdf_pi1[pageUids][0]=
-				}
-			}
-			// We do not want search engines to follow the PDF link.
-			ATagParams = rel="nofollow"
-		}
+  pdfLink = TEXT
+  pdfLink {
+    value = {$plugin.tx_webkitpdf_pi1.pdfLink.linkText}
+    typolink {
+      parameter = {$plugin.tx_webkitpdf_pi1.pdfLink.pluginPid}
+      additionalParams.cObject = COA
+      additionalParams.cObject {
+        10 = TEXT
+        10 {
+          data = getIndpEnv:TYPO3_REQUEST_URL
+          rawUrlEncode = 1
+          wrap = &tx_webkitpdf_pi1[urls][0]=|
+        }
 
-		// Do not display the PDF link on the page where the plugin is located.
-		if.value = {$plugin.tx_webkitpdf_pi1.pdfLink.pluginPid}
-		if.equals.data = TSFE:id
-		if.negate = 1
-	}
+        20 = TEXT
+        20 {
+          data = TSFE:id
+          wrap = &tx_webkitpdf_pi1[pageUids][0]=
+        }
+      }
 
-	options {
+      // We do not want search engines to follow the PDF link.
+      ATagParams = rel="nofollow"
+    }
 
-		debug = 0
-		pageURLInHeader = 0
-		copyrightNotice = 0
-		additionalStylesheet =
-		additionalStylesheet.getFileAbsFileName = 0
-		overrideUserAgent =
-		fileOnly = 0
-		allowedHosts =
-		urls =
-		filePrefix =
-		customParameterName =
-		customPdfGenerator =
-		customScriptPath =
-		staticFileName =
+    // Do not display the PDF link on the page where the plugin is located.
+    if.value = {$plugin.tx_webkitpdf_pi1.pdfLink.pluginPid}
+    if.equals.data = TSFE:id
+    if.negate = 1
+  }
 
-		// If a page context is available we generate a static filename based on the UID and the title of the page.
-		staticFileNameInPageContext.cObject = COA
-		staticFileNameInPageContext.cObject {
-			10 = TEXT
-			10.field = uid
-			10.stdWrap.outerWrap = |-
-			10.stdWrap.required = 1
-			20 = TEXT
-			20.field = title
-		}
+  options {
+    debug = 0
+    pageURLInHeader = 0
+    copyrightNotice = 0
+    additionalStylesheet =
+    additionalStylesheet.getFileAbsFileName = 0
+    overrideUserAgent =
+    fileOnly = 0
+    allowedHosts =
+    urls =
+    filePrefix =
+    customParameterName =
+    customPdfGenerator =
+    customScriptPath =
+    staticFileName =
 
-	}
+    // If a page context is available we generate a static filename based on the UID and the title of the page.
+    staticFileNameInPageContext.cObject = COA
+    staticFileNameInPageContext.cObject {
+      10 = TEXT
+      10.field = uid
+      10.stdWrap.outerWrap = |-
+      10.stdWrap.required = 1
+      20 = TEXT
+      20.field = title
+    }
 
-	pdfGenerators {
-		background {
-			logFile =
-			waitTimeInSeconds = 10
-		}
-	}
+  }
+
+  pdfGenerators {
+    background {
+      logFile =
+      waitTimeInSeconds = 10
+    }
+  }
 
 
-	scriptParams {
+  scriptParams {
 
-	}
+  }
 }
 
 tt_content.list.20.webkitpdf_pi1 =< plugin.tx_webkitpdf_pi1
