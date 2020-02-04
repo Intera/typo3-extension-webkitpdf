@@ -6,7 +6,7 @@ plugin.tx_webkitpdf_pi1 {
   contentObjects {
     errorMessage = TEXT
     errorMessage.field = tx_webkitpdf_error
-    errorMessage.wrap = <div class="error">|</div>
+    errorMessage.wrap = <div class="alert alert-danger">|</div>
   }
 
   pdfLink = TEXT
@@ -75,7 +75,6 @@ plugin.tx_webkitpdf_pi1 {
       waitTimeInSeconds = 10
     }
   }
-
 
   scriptParams {
 
